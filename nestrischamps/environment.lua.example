@@ -3,3 +3,6 @@ DEFAULTSECRET = ""
 
 AUTOCONNECT = false -- skips the dialog and uses the above values instead
 LOGGING = false -- prints more stuff to console
+
+EASYCONNECT = false -- show simplified connection dialog
+DEFAULTEASYCONNECT= "v=1"

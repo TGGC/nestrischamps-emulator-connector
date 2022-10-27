@@ -22,6 +22,14 @@ local frameManager = require "nestrischamps.frameManager"
 local playfield = require "nestrischamps.playfield"
 local socket = require "socket.core"
 
+-- try to activate easy connect
+pcall(function()
+    require "easyconnect"
+	EASYCONNECT = true -- show simplified connection dialog
+	print("easyconnect activated")
+	print("Delete easyconnect.lua to disable easyconnect")
+end)
+
 
 local conn
 function connect(url, secret) -- called by the emu plugin file
@@ -47,6 +55,36 @@ function connect(url, secret) -- called by the emu plugin file
             end)
         end
     end
+end
+
+function connectImproved(url, secret, easy) -- called by the emu plugin file for easy login
+
+	local easyData = {}
+    for k, v in string.gmatch(easy, "(%w+)=(%w+)") do
+		easyData[k] = v
+    end
+	
+	if (easyData["v"] ~= nil) then
+		local version = easyData["v"]
+		print("Use URL Version " .. version)
+		local urls = 		
+			{	["1"] = "ws://nestrischamps.io/ws/room/producer", 
+				["2"] = "ws://nestrischamps.io/ws/room/u/{host}/producer",}
+		if (urls[version] ~= nil) then
+			local urlBase = urls[version]
+			url = string.gsub(urlBase, "%{(%w+)%}", easyData)
+			print("using URL: " .. url)
+		else
+			print("URL Version unknown")
+		end
+	end
+	
+	if (easyData["s"] ~= nil) then
+		secret = easyData["s"]
+		print("using secret: " .. secret)
+	end
+	 
+    return connect(url, secret)
 end
 
 local startTime = socket.gettime()*1000 -- questionable use of socket
