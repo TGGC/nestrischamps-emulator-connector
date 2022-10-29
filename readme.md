@@ -35,3 +35,16 @@ Because OCR is slow and unnecessary for emulators.
 If it worked, it should say "Connected successfully!". You can then go to your renderer (go to https://nestrischamps.io/renderers and select Simple 1p) and it should display any game you start.
 
 You can find your secret on the NestrisChamps settings page, https://nestrischamps.io/settings
+
+## Easy Connect Info
+The "Easy Connect Info" is meant to encapsulate all necessary information to connect to the websocket at nestetrischamps.io. It can contain a number of "key=value" pairs which are seperated by a "&". It usually looks something like "v=2&host=XXX&s=YYY", but can also be shortened. E.g. "v=1" sends to the players private room, if his DEFAULTSECRET is set up correctly.
+
+### "v" -> URL Version
+- "v=1" -> ws://nestrischamps.io/ws/room/producer
+- "v=2" -> ws://nestrischamps.io/ws/room/u/{host}/producer
+
+### "host" -> Twitch Username of the Host
+Can be left out when not URL Version 2 is used.
+
+### "s" -> Secret
+The player needs to use his private secret to identify himself, can be found on https://nestrischamps.io/settings
