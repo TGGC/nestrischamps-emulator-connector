@@ -1,5 +1,6 @@
 -- find out which emu we're doing
 -- this isn't optimal but I couldn't find a way to properly figure out the emu
+
 local currentEmulator
 if client then
     currentEmulator = "bizhawk"
@@ -32,11 +33,15 @@ end)
 
 
 local conn
+local lastURL
+local lastSecret
 function connect(url, secret) -- called by the emu plugin file
     if not url or not secret then
         print("Settings not found. You need to set up an environment.lua for Mesen and Bizhawk, see environment.lua.example")
         error()
     end
+	
+	lastURL = url;
 
     url = url .. "/" .. secret
 
@@ -47,6 +52,8 @@ function connect(url, secret) -- called by the emu plugin file
         error()
     else
         print("Connected successfully!")
+		
+		lastSecret = secret
 
         if emu.registerexit then
             emu.registerexit(function()
@@ -55,6 +62,16 @@ function connect(url, secret) -- called by the emu plugin file
             end)
         end
     end
+end
+
+function reconnect()
+	-- was there any sucessful connection before?
+    if not lastURL or not lastSecret then
+		return
+	end
+	
+	print("connection problem detected, trying reconnect...")
+	connect(lastURL, lastSecret)
 end
 
 function connectImproved(url, secret, easy) -- called by the emu plugin file for easy login
@@ -188,23 +205,37 @@ function loop()
     if time - lastFrame >= 5000 then -- 5 seconds
         resendFrame = true
     end
+	local tryReconnect = false
 
-    if (newFrame or resendFrame) and conn then
-        local ms = math.floor(time - startTime)
+    if (newFrame or resendFrame) then
+		if conn then
+			local ms = math.floor(time - startTime)
 
-        if newFrame then
-            frameManager.update(ms, gameNo)
-            log("Sending new frame (" .. ms .. ")")
-        elseif resendFrame then
-            log("Resending an old frame.")
-        end
+			if newFrame then
+				frameManager.update(ms, gameNo)
+				log("Sending new frame (" .. ms .. ")")
+			elseif resendFrame then
+				log("Resending an old frame.")
+			end
 
-        local success = wssend(conn, 2, frameManager.frame)
-        --todo: something if not success (reconnect? hcf?)
+			local success = wssend(conn, 2, frameManager.frame)
+			--todo: something if not success (reconnect? hcf?)
+			
+			if not success then
+				print("could not send frame data")
+				tryReconnect = true
+			end
 
-        lastFrame = time
+			lastFrame = time
+		else
+			tryReconnect = true
+		end
     end
-
+	
+	if tryReconnect then
+		reconnect()
+	end
+	
     previousPieceState = pieceState
     previousGameState = gameState
 end

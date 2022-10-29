@@ -1,3 +1,8 @@
+function toNumberSafe(numString)
+	local ret = tonumber(numString);
+	return ret or 0;
+end
+
 function getPieceState() -- pieceState is a thing for the current piece about which "routine" it's in, like piece dropping, line checks, line clears, etc
     return memory.readbyte(0x0048)
 end
@@ -17,19 +22,19 @@ function getScore()
 		return score
 	end
 
-	local scoreLeft = tonumber(string.format("%x", memory.readbyte(0x0055)))
+	local scoreLeft = toNumberSafe(string.format("%x", memory.readbyte(0x0055)))
 
-	local scoreMiddle = tonumber(string.format("%x", memory.readbyte(0x0054)))
+	local scoreMiddle = toNumberSafe(string.format("%x", memory.readbyte(0x0054)))
 
-	local scoreRight = tonumber(string.format("%x", memory.readbyte(0x0053)))
+	local scoreRight = toNumberSafe(string.format("%x", memory.readbyte(0x0053)))
 
 	local score = scoreLeft*10000 + scoreMiddle*100 + scoreRight
 	return score
 end
 
 function getLines()
-	local linesLeft = tonumber(string.format("%x", memory.readbyte(0x0051)))
-	local linesRight = tonumber(string.format("%x", memory.readbyte(0x0050)))
+	local linesLeft = toNumberSafe(string.format("%x", memory.readbyte(0x0051)))
+	local linesRight = toNumberSafe(string.format("%x", memory.readbyte(0x0050)))
 
 	local lines = linesLeft*100 + linesRight
 	return lines
@@ -40,7 +45,7 @@ function getLevel()
 end
 
 function getNextPiece()
-    return PIECETABLE[memory.readbyte(0x00BF)+1]
+    return PIECETABLE[memory.readbyte(0x00BF)+1] or 0
 end
 
 function getBlock(x, y)
@@ -87,8 +92,8 @@ end
 function getPieceStatistic(pieceNum)
     local address = 0x03F0 + (pieceNum-1)*2
 
-	local statisticLeft = tonumber(string.format("%x", memory.readbyte(address+1)))
-	local statisticRight = tonumber(string.format("%x", memory.readbyte(address)))
+	local statisticLeft = toNumberSafe(string.format("%x", memory.readbyte(address+1)))
+	local statisticRight = toNumberSafe(string.format("%x", memory.readbyte(address)))
 
 	local statistic = statisticLeft*100 + statisticRight
 
