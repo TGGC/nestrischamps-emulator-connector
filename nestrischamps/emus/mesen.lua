@@ -18,7 +18,14 @@ function print(...)
 end
 
 function onLoad()
-    connect(DEFAULTURL, DEFAULTSECRET)
+    if EASYCONNECT then
+		connectImproved(
+			DEFAULTURL or "",
+			DEFAULTSECRET or "",
+			DEFAULTEASYCONNECT or "")
+	else
+		connect(DEFAULTURL, DEFAULTSECRET)
+	end
 
     emu.addEventCallback(loop, emu.eventType.endFrame) -- main loop
 end
